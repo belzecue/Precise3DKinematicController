@@ -1,6 +1,6 @@
 extends KinematicBody
 
-class_name 3DKinematicCharacter
+class_name KinematicCharacter3D
 
 export(float) var gravity = -13.0
 export(float) var max_speed = 3.0
@@ -33,7 +33,6 @@ var _on_wall = false
 var _floor_velocity = Vector3()
 var _on_floor_body = RID()
 var _collisions = []
-var _dss = null
 
 enum CONTROLLER_STATE {
 	SLIDING,
@@ -55,27 +54,12 @@ var visual_vector1 = Vector3.ZERO
 var visual_vector2 = Vector3.ZERO
 var step_debug = ''
 
-func _ready():
-#	Engine.time_scale = 0.1
-#	DebugDraw3d.add_vector(self, "visual_vector1", 1.0, 3.0, Color.green)
-#	DebugDraw3d.add_vector(self, "visual_vector2", 1.0, 3.0, Color.red)
-#	DebugStats.add_property(self, "_controller_state_name", "")
-#	DebugStats.add_property(self, "_velocity", "")
-#	DebugStats.add_property(self, "step_debug", "")
-#	DebugStats.add_property(self, "_on_ceiling", "")
-#	DebugStats.add_property(self, "_on_wall", "")
-#	DebugStats.add_property(self, "_on_floor", "")
-	
-	_dss = PhysicsServer.space_get_direct_state(get_world().get_space())
-	PhysicsServer.body_set_enable_continuous_collision_detection(get_rid(), true)
-
 func custom_move(move_direction: Vector3, pressing_jump: bool, delta: float) -> void:
 	if _on_floor:
 		_snap_vector = Vector3.DOWN * delta
 #		# Workaround for sliding down after jump on slope
 #		if _velocity.y < 0:
 #			_velocity.y = 0
-#
 #		# remove remaining up force
 #		if _velocity.dot(move_direction) == 0:
 #			if _velocity.y > 0:
@@ -86,11 +70,6 @@ func custom_move(move_direction: Vector3, pressing_jump: bool, delta: float) -> 
 			_snap_vector = Vector3.ZERO
 	else:
 		_velocity.y += gravity * delta
-		
-#		# Workaround for 'vertical bump' when going off platform
-#		#if _snap_vector != Vector3.ZERO && _velocity.y != 0:
-#		#	_velocity.y = 0
-		#_snap_vector = Vector3.ZERO
 	
 	move_direction.y = 0.0
 	move_direction = move_direction.normalized()
@@ -121,9 +100,6 @@ func custom_move(move_direction: Vector3, pressing_jump: bool, delta: float) -> 
 	# test move along ground
 	step_move(delta)
 #	print(_on_floor, " / ", step_debug)
-	
-	if not _on_floor:
-		_controller_state = CONTROLLER_STATE.FALLING
 	
 	# Prop pushing
 	for index in range(_collisions.size()):
