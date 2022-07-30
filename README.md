@@ -1,5 +1,6 @@
-# Precise3DKinematicController
-A precise kinematic controller implemented in Godot but design can be applied to any physics engine. This controller defines the collision response of the body, not the motion, that is entirely up to you. The lessons I learnt building this took me to study how Valve, Nvida PhysX, and bungie do kinematic controllers. This controller is based on the Valve style. This style uses a box collision shape with manual step handling for precise control of step height.
+# Precise3DKinematicController (2022)
+A precise kinematic controller implemented in Godot but design can be applied to any physics engine. This controller defines the collision response of the body, not the motion, that is entirely up to you. The lessons I learnt building this took me to study how Valve, Nvida PhysX, and bungie do kinematic controllers. This controller is based on the Valve style. This style uses a box collision shape with manual step handling for precise control of step height. 
+
 
 ## Stepping behaviour
 A kinematic body has a shape and is generally a box or capsule:
@@ -12,6 +13,9 @@ The benefit of the capsule is that the curved surface of its bottom will reflect
 Every step must be handled manually. No curvature means no reflection means no free stepping.
 The solution is to warp the player to the top of the stair when detected. This however gives the issue of jerky motion which needs to be smoothed for a pleasant viewing experience.
 I think this control is what makes the box shape interesting to me. Ultimately you have to ask "how important are stairs in my game?". Maybe this heuristic works: if your game environment is small; stairs are important. If your game environment is large; stairs are likely not important. For example: if your character moves around a house they will move on stairs a lot. Making sure that experience is precise might be a reason to use the box shape.
+
+## Method
+The method of achieving the stepping behaviour is to, every physics frame, cast your desired motion with an additional cast at step height. Whichever moves the furthest on the ground plane (remove step height) is the cast we use to update our character. Things are rarely this simple. We must also check before casting at step height if we are penatrating geometry. If so, we cannot step otherwise we step into the roof. We must also cast down from our step cast to find the height of the actual step. This height becomes the actual step, this prevents overstepping or stepping the max step height for every step. We must also check for slopes so we dont step on those. If all this sounds like a pain to debug: we can just use a capsule haha.
 
 
 ## Future:
